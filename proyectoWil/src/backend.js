@@ -6,12 +6,15 @@ import { doc, setDoc, updateDoc } from "firebase/firestore";
 
 const register = async (email, password, nombre, titulo, fechaGraduacion) => {
   try {
+    //funcion del SDK de Firebase para crear usuarios
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       email,
       password
     );
+    //toma el usuario que se acaba de registrar
     const user = userCredential.user;
+    //agrega los datos adicionales al usuario
     await setDoc(doc(db, "users", user.uid), {
       nombre: nombre,
       email: email,
@@ -27,6 +30,7 @@ const register = async (email, password, nombre, titulo, fechaGraduacion) => {
 
 const login = async (email, password) => {
   try {
+    //Funcion del SDK de Firebase para iniciar sesión
     const userCredential = await signInWithEmailAndPassword(
       auth,
       email,
@@ -40,6 +44,7 @@ const login = async (email, password) => {
 
 const logout = async () => {
   try {
+    //Funcion del SDK de Firebase para cerrar sesión
     await signOut(auth);
     console.log("Sesion cerrada");
   } catch (error) {
@@ -49,11 +54,12 @@ const logout = async () => {
 
 const updateUser = async (nombre, titulo, fechaGraduacion) => {
   try {
+    //toma el usuario que esta autenticado actualmente
     const user = auth.currentUser;
     if (!user) throw new Error("No hay usuario autenticado");
-
+    //busca el documento del usuario autenticado, usando su uid
     const userRef = doc(db, "users", user.uid);
-
+    //actualiza los datos
     await updateDoc(userRef, {
       nombre: nombre,
       titulo: titulo,
