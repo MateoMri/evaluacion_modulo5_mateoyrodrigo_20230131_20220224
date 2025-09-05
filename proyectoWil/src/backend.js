@@ -2,7 +2,7 @@ import { auth, db } from "./config/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { signOut } from "firebase/auth";
-import { doc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc, getDoc } from "firebase/firestore";
 
 const register = async (email, password, nombre, titulo, fechaGraduacion) => {
   try {
@@ -36,9 +36,10 @@ const login = async (email, password) => {
       email,
       password
     );
-    console.log("Sesion iniciada: ", userCredential);
+    console.log("Sesion iniciada: ")
   } catch (error) {
     console.error("Error al iniciar sesion: ", error.message);
+    throw error;
   }
 };
 
@@ -71,4 +72,23 @@ const updateUser = async (nombre, titulo, fechaGraduacion) => {
     console.error("Error al actualizar usuario: ", error.message);
   }
 };
-export { register, login, logout, updateUser };
+
+const getUserData = async () => {
+  try {
+    const user = auth.currentUser;
+    if (!user) throw new Error("No hay usuario autenticado");
+
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      return userSnap.data(); 
+    } else {
+      throw new Error("El documento del usuario no existe");
+    }
+  } catch (error) {
+    console.error("Error al obtener datos del usuario:", error.message);
+    throw error;
+  }
+};
+export { register, login, logout, updateUser, getUserData };
